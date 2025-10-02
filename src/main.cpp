@@ -1,18 +1,45 @@
 #include <Arduino.h>
+#include <OneButton.h>
 
-// put function declarations here:
-int myFunction(int, int);
+#define LED1_PIN 5
+#define LED2_PIN 6
+#define BUTTON_PIN 4
+OneButton button(BUTTON_PIN, true);
+
+bool controllingLED1 = true;
 
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
-}
+  pinMode(LED1_PIN, OUTPUT);
+  pinMode(LED2_PIN, OUTPUT);
 
+  button.attachClick(toggleLED);
+  button.attachDoubleClick(changeLED);
+  button.attachDuringLongPress(blinkLED);
+}
 void loop() {
-  // put your main code here, to run repeatedly:
+  button.tick();
 }
+void toggleLED() {
+  if (controllingLED1) {
+    digitalWrite(LED1_PIN, !digitalRead(LED1_PIN));
+  } else {
+    digitalWrite(LED2_PIN, !digitalRead(LED2_PIN));
+  }
+}
+void changeLED() {
+  controllingLED1 = !controllingLED1;
+}
+void blinkLED() {
+  int blinkInterval = 200;
+  unsigned long currentMillis = millis();
+  static unsigned long previousMillis = 0;
 
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+  if (currentMillis - previousMillis >= blinkInterval) {
+    previousMillis = currentMillis;
+    if (controllingLED1) {
+      digitalWrite(LED1_PIN, !digitalRead(LED1_PIN));
+    } else {
+      digitalWrite(LED2_PIN, !digitalRead(LED2_PIN));
+    }
+  }
 }
